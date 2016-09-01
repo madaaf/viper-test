@@ -26,14 +26,14 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         loginModule = new LoginModule(getApplicationModule(this));
-        loginModule.getAttachableView().attach(this);
+        loginModule.getViewDecorator().setLoginView(this);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
         binding.setController(loginModule.getController());
     }
 
     @Override
     protected void onDestroy() {
-        loginModule.getAttachableView().detach();
+        loginModule.getViewDecorator().setLoginView(null);
         super.onDestroy();
     }
 

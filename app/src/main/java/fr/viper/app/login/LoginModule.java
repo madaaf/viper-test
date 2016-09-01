@@ -2,6 +2,8 @@ package fr.viper.app.login;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.nicolasmouchel.executordecorator.ExecutorDecorator;
+
 import fr.viper.app.ApplicationModule;
 import fr.viper.app.Attachable;
 import fr.viper.app.login.controller.LoginController;
@@ -18,21 +20,28 @@ import fr.viper.repositories.login.SimulateDelayLoginRepository;
 
 public class LoginModule {
     private final ApplicationModule applicationModule;
-    private final LoginViewDecorator viewDecorator;
+    private final LoginView view;
 
     public LoginModule(ApplicationModule applicationModule) {
         this.applicationModule = applicationModule;
-        this.viewDecorator = new LoginViewDecorator(applicationModule.getUiThreadExecutor());
+        this.view = getView();
     }
 
+
+    @ExecutorDecorator()
     public LoginController getController() {
         final LoginInteractor interactor = new LoginInteractor(getRepository(), getPresenter());
         final LoginControllerImpl controller = new LoginControllerImpl(interactor);
-        return new LoginControllerDecorator(controller, applicationModule.getAsyncExecutor());
+        return new LoginControllerDecorator(applicationModule.getAsyncExecutor(),controller);
     }
 
-    public Attachable<LoginView> getAttachableView(){
-        return viewDecorator;
+    public LoginViewDecorator getViewDecorator(){
+        return (LoginViewDecorator) view;
+    }
+
+    @ExecutorDecorator(mutable = true)
+    private LoginView getView() {
+        return new LoginViewDecorator(applicationModule.getUiThreadExecutor());
     }
 
     private LoginRepository getRepository() {
@@ -42,6 +51,6 @@ public class LoginModule {
     }
 
     private LoginPresenter getPresenter(){
-        return new LoginPresenterImpl(viewDecorator, applicationModule.getContext());
+        return new LoginPresenterImpl(view, applicationModule.getContext());
     }
 }
