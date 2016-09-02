@@ -27,16 +27,15 @@ public class LoginModule {
         this.view = getView();
     }
 
+    public LoginViewDecorator getViewDecorator() {
+        return (LoginViewDecorator) view;
+    }
 
     @ExecutorDecorator()
     public LoginController getController() {
         final LoginInteractor interactor = new LoginInteractor(getRepository(), getPresenter());
         final LoginControllerImpl controller = new LoginControllerImpl(interactor);
         return new LoginControllerDecorator(applicationModule.getAsyncExecutor(),controller);
-    }
-
-    public LoginViewDecorator getViewDecorator(){
-        return (LoginViewDecorator) view;
     }
 
     @ExecutorDecorator(mutable = true)
